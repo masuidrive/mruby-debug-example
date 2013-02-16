@@ -1,0 +1,14 @@
+# /
+*.bak
+*.orig
+*.rej
+*.sav
+*.swp
+*.tmp
+*~
+.DS_Store
+.svn
+/.git
+/bin
+/build
+/tmp
