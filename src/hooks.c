@@ -1,6 +1,7 @@
 #include <mruby.h>
 #include <stdio.h>
 #include <string.h>
+#include "mruby.h"
 #include "mruby/irep.h"
 #include "mruby/string.h"
 #include "mruby/proc.h"
@@ -447,7 +448,7 @@ void hook_mrb_read_irep(struct mrb_state* mrb, int ret, const char *bin) {
 
 struct saved_hooks {
   mrb_state *mrb;
-  void (*hook_vm_fetch_code)(struct mrb_state* mrb, struct RProc *proc, mrb_value self, mrb_code *pc);
+  void (*code_fetch_hook)(struct mrb_state* mrb, struct RProc *proc, mrb_value self, mrb_code *pc);
 };
 static struct saved_hooks *saved_hooks = NULL;
 static int mrb_count = 0;
@@ -463,29 +464,25 @@ static struct saved_hooks* get_saved_hooks(struct mrb_state* mrb) {
 }
 
 void mrb_mruby_debug_example_gem_init(mrb_state* mrb) {
-#ifdef ENABLE_DEBUG
   /* saved original hooks */
   ++mrb_count;
   saved_hooks = mrb_realloc(mrb, saved_hooks, sizeof(struct saved_hooks) * mrb_count);
   saved_hooks[mrb_count - 1].mrb = mrb;
-  saved_hooks[mrb_count - 1].hook_vm_fetch_code = mrb->hook_vm_fetch_code;
+  saved_hooks[mrb_count - 1].code_fetch_hook = mrb->code_fetch_hook;
 
   /* set hooks */
-  mrb->hook_vm_fetch_code = hook_vm_fetch_code;
-#endif
+  mrb->code_fetch_hook = hook_vm_fetch_code;
 }
 
 void mrb_mruby_debug_example_gem_final(mrb_state* mrb) {
-#ifdef ENABLE_DEBUG
   int i;
   for(i = 0; i < mrb_count; ++i) {
     if(saved_hooks[i].mrb == mrb) {
-      mrb->hook_vm_fetch_code = saved_hooks[i].hook_vm_fetch_code;
+      mrb->code_fetch_hook = saved_hooks[i].code_fetch_hook;
       --mrb_count;
       memcpy(&saved_hooks[i], &saved_hooks[i+1], (mrb_count - i));
       saved_hooks = mrb_realloc(mrb, saved_hooks, sizeof(struct saved_hooks) * mrb_count);
       return;
     }
   }
-#endif
 }

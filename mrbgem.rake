@@ -6,7 +6,9 @@ MRuby::Gem::Specification.new('mruby-debug-example') do |spec|
   # spec.cc.flags << ''
 
   # Add cflags to all
-  # spec.mruby.cc.defineds -= ''
+  spec.mruby.cc.defines << 'ENABLE_DEBUG'
+  spec.cc.defines << 'ENABLE_DEBUG'
+  # spec.mruby.cc.defineds << ''
 
   # Add libraries
   # spec.linker.libraries << 'external_lib'
